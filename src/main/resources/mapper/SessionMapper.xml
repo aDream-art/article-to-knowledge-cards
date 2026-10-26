@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luojiajun.chat.mapper.SessionMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chat_session (user_id, title, provider, model, document_id, last_message_at)
+        VALUES (#{userId}, #{title}, #{provider}, #{model}, #{documentId}, #{lastMessageAt})
+    </insert>
+
+    <select id="selectByIdAndUser" resultType="com.luojiajun.chat.entity.ChatSession">
+        SELECT id, user_id, title, provider, model, document_id, last_message_at, created_at, updated_at
+        FROM chat_session
+        WHERE id = #{id} AND user_id = #{userId}
+    </select>
+
+    <select id="selectByUser" resultType="com.luojiajun.chat.entity.ChatSession">
+        SELECT s.id, s.user_id, s.title, s.provider, s.model, s.document_id,
+               s.last_message_at, s.created_at, s.updated_at,
+               (SELECT LEFT(m.content, 40)
+                FROM chat_message m
+                WHERE m.session_id = s.id
+                ORDER BY m.id DESC
+                LIMIT 1) AS last_message
+        FROM chat_session s
+        WHERE s.user_id = #{userId}
+        ORDER BY COALESCE(s.last_message_at, s.created_at) DESC, s.id DESC
+    </select>
+
+    <update id="updateTitle">
+        UPDATE chat_session SET title = #{title} WHERE id = #{id} AND user_id = #{userId}
+    </update>
+
+    <update id="updateModel">
+        UPDATE chat_session SET provider = #{provider}, model = #{model}
+        WHERE id = #{id} AND user_id = #{userId}
+    </update>
+
+    <update id="updateDocument">
+        UPDATE chat_session SET document_id = #{documentId} WHERE id = #{id} AND user_id = #{userId}
+    </update>
+
+    <update id="touchLastMessage">
+        UPDATE chat_session SET last_message_at = #{time} WHERE id = #{id} AND user_id = #{userId}
+    </update>
+
+    <delete id="deleteByIdAndUser">
+        DELETE FROM chat_session WHERE id = #{id} AND user_id = #{userId}
+    </delete>
+
+    <update id="clearDocumentById">
+        UPDATE chat_session SET document_id = NULL WHERE document_id = #{documentId}
+    </update>
+
+    <select id="countByUser" resultType="long">
+        SELECT COUNT(*) FROM chat_session WHERE user_id = #{userId}
+    </select>
+</mapper>

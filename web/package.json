@@ -1,0 +1,28 @@
+{
+  "name": "ai-chat-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "轻量 AI 问答助手 — 前端（Vue 3 + Vite + TypeScript）",
+  "scripts": {
+    "dev": "vite",
+    "build": "node scripts/build.mjs",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "element-plus": "^2.9.3",
+    "highlight.js": "^11.11.1",
+    "marked": "^15.0.7",
+    "pinia": "^2.3.1",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "~5.7.3",
+    "vite": "^6.0.11"
+  }
+}

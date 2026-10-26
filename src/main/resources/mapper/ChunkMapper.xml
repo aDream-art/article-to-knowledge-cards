@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luojiajun.chat.mapper.ChunkMapper">
+
+    <insert id="batchInsert">
+        INSERT INTO chat_chunk (document_id, user_id, seq, content, embedding, token_est)
+        VALUES
+        <foreach collection="list" item="c" separator=",">
+            (#{c.documentId}, #{c.userId}, #{c.seq}, #{c.content},
+             #{c.embedding,jdbcType=BLOB}, #{c.tokenEst})
+        </foreach>
+    </insert>
+
+    <select id="selectByDocument" resultType="com.luojiajun.chat.entity.ChatChunk">
+        SELECT id, document_id, user_id, seq, content, embedding, token_est
+        FROM chat_chunk
+        WHERE document_id = #{documentId}
+        ORDER BY seq ASC
+    </select>
+
+    <delete id="deleteByDocument">
+        DELETE FROM chat_chunk WHERE document_id = #{documentId}
+    </delete>
+</mapper>

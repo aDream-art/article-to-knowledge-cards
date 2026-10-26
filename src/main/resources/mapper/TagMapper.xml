@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luojiajun.chat.mapper.TagMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chat_tag (user_id, name) VALUES (#{userId}, #{name})
+    </insert>
+
+    <select id="selectByUser" resultType="com.luojiajun.chat.entity.ChatTag">
+        SELECT t.id, t.user_id, t.name, t.created_at, COUNT(ft.favorite_id) AS count
+        FROM chat_tag t
+        LEFT JOIN chat_favorite_tag ft ON ft.tag_id = t.id
+        WHERE t.user_id = #{userId}
+        GROUP BY t.id, t.user_id, t.name, t.created_at
+        ORDER BY t.id ASC
+    </select>
+
+    <select id="selectByIdAndUser" resultType="com.luojiajun.chat.entity.ChatTag">
+        SELECT id, user_id, name, created_at FROM chat_tag
+        WHERE id = #{id} AND user_id = #{userId}
+    </select>
+
+    <select id="selectByIds" resultType="com.luojiajun.chat.entity.ChatTag">
+        SELECT id, user_id, name, created_at FROM chat_tag
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <delete id="deleteByIdAndUser">
+        DELETE FROM chat_tag WHERE id = #{id} AND user_id = #{userId}
+    </delete>
+
+    <delete id="deleteRelationsByTag">
+        DELETE FROM chat_favorite_tag WHERE tag_id = #{tagId}
+    </delete>
+</mapper>

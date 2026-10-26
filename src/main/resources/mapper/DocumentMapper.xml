@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luojiajun.chat.mapper.DocumentMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chat_document (user_id, filename, byte_size, char_count, chunk_count, status)
+        VALUES (#{userId}, #{filename}, #{byteSize}, #{charCount}, #{chunkCount}, #{status})
+    </insert>
+
+    <select id="selectByUser" resultType="com.luojiajun.chat.entity.ChatDocument">
+        SELECT id, user_id, filename, byte_size, char_count, chunk_count, status, created_at
+        FROM chat_document
+        WHERE user_id = #{userId}
+        ORDER BY id DESC
+    </select>
+
+    <select id="selectByIdAndUser" resultType="com.luojiajun.chat.entity.ChatDocument">
+        SELECT id, user_id, filename, byte_size, char_count, chunk_count, status, created_at
+        FROM chat_document
+        WHERE id = #{id} AND user_id = #{userId}
+    </select>
+
+    <update id="updateAfterParse">
+        UPDATE chat_document
+        SET status = #{status}, char_count = #{charCount}, chunk_count = #{chunkCount}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteByIdAndUser">
+        DELETE FROM chat_document WHERE id = #{id} AND user_id = #{userId}
+    </delete>
+
+    <select id="countByUser" resultType="long">
+        SELECT COUNT(*) FROM chat_document WHERE user_id = #{userId}
+    </select>
+</mapper>

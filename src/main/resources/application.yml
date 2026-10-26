@@ -1,0 +1,118 @@
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+
+spring:
+  application:
+    name: ai-chat-server
+  config:
+    # 本地裸跑时直接读工作目录下的 .env（KEY=VALUE 即 properties 格式）；Docker 里走环境变量
+    import: optional:file:.env[.properties]
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DB:ai_chat}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 5000
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DB:0}
+      timeout: 2s
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 3MB
+  jackson:
+    default-property-inclusion: non_null
+  mvc:
+    async:
+      request-timeout: 120000
+
+mybatis:
+  mapper-locations: classpath*:mapper/*.xml
+  type-aliases-package: com.luojiajun.chat.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    default-fetch-size: 100
+    default-statement-timeout: 30
+
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countSql
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+  health:
+    redis:
+      # Windows 版 Redis 的 INFO 里 executable 是含反斜杠的本地路径，其中的 \u 会被 Properties
+      # 当成 Unicode 转义解析失败，导致 health 永远 DOWN（Redis 实际读写正常）。
+      # 生产 Linux 环境可去掉这一行重新启用。
+      enabled: false
+
+chat:
+  jwt:
+    secret: ${JWT_SECRET:ai-chat-assistant-dev-secret-change-me-32bytes}
+    expire-seconds: ${JWT_EXPIRE_SECONDS:604800}
+  providers:
+    deepseek:
+      base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
+      api-key: ${DEEPSEEK_API_KEY:}
+      default-model: ${DEEPSEEK_MODEL:deepseek-chat}
+    qwen:
+      base-url: ${QWEN_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
+      api-key: ${DASHSCOPE_API_KEY:}
+      default-model: ${QWEN_MODEL:qwen-plus}
+  embedding:
+    base-url: ${EMBEDDING_BASE_URL:https://dashscope.aliyuncs.com/api/v1/services/embeddings/text-embedding/text-embedding}
+    api-key: ${DASHSCOPE_API_KEY:}
+    model: ${EMBEDDING_MODEL:text-embedding-v3}
+    dimension: 1024
+    batch-size: 10
+  rag:
+    chunk-size: 400
+    overlap: 80
+    top-k: 5
+    threshold: 0.3
+  context:
+    max-rounds: 10
+    max-tokens: 3000
+    ttl-seconds: 7200
+  limit:
+    per-minute: 20
+    daily-tokens: 30000
+    max-concurrency: 20
+  upload:
+    max-bytes: 1048576
+    max-docs-per-user: 10
+  mock:
+    enabled: ${CHAT_MOCK_ENABLED:true}
+
+logging:
+  level:
+    root: info
+    com.luojiajun.chat: info
+    org.springframework.jdbc: info

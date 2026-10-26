@@ -1,0 +1,40 @@
+# java / maven
+target/
+*.class
+
+# node
+node_modules/
+web/dist/
+web/.vite/
+web/.tmp/
+
+# env & secrets
+.env
+.env.local
+
+# local tooling (portable redis, temp dbs, scratch payloads)
+.tools/
+
+# logs
+logs/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# os
+.DS_Store
+Thumbs.db
+
+# scratch artifacts (local markdown tracker keeps tickets, not extracted copies)
+.scratch/
+.scratch/mall-inspect/
+
+# internal planning / interview notes (kept local, not published)
+docs/interview-guide.md
+docs/resume-project.md
+
+# redis snapshot (written if redis is started from the project root)
+dump.rdb

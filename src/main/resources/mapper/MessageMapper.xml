@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luojiajun.chat.mapper.MessageMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chat_message (session_id, user_id, role, content, provider, model,
+                                  token_in, token_out, status, latency_ms)
+        VALUES (#{sessionId}, #{userId}, #{role}, #{content}, #{provider}, #{model},
+                #{tokenIn}, #{tokenOut}, #{status}, #{latencyMs})
+    </insert>
+
+    <update id="updateResult">
+        UPDATE chat_message
+        SET content = #{content}, token_in = #{tokenIn}, token_out = #{tokenOut},
+            status = #{status}, latency_ms = #{latencyMs},
+            provider = #{provider}, model = #{model}
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectPageBySession" resultType="com.luojiajun.chat.entity.ChatMessage">
+        SELECT id, session_id, user_id, role, content, provider, model,
+               token_in, token_out, status, latency_ms, created_at
+        FROM chat_message
+        WHERE session_id = #{sessionId} AND user_id = #{userId}
+        ORDER BY id DESC
+    </select>
+
+    <select id="selectRecent" resultType="com.luojiajun.chat.entity.ChatMessage">
+        SELECT t.id, t.session_id, t.user_id, t.role, t.content, t.provider, t.model,
+               t.token_in, t.token_out, t.status, t.latency_ms, t.created_at
+        FROM (
+            SELECT id, session_id, user_id, role, content, provider, model,
+                   token_in, token_out, status, latency_ms, created_at
+            FROM chat_message
+            WHERE session_id = #{sessionId}
+            ORDER BY id DESC
+            LIMIT #{limit}
+        ) t
+        ORDER BY t.id ASC
+    </select>
+
+    <delete id="deleteBySession">
+        DELETE FROM chat_message WHERE session_id = #{sessionId} AND user_id = #{userId}
+    </delete>
+</mapper>

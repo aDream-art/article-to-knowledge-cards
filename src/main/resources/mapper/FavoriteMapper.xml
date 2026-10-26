@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luojiajun.chat.mapper.FavoriteMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chat_favorite (user_id, session_id, question, answer, provider, model)
+        VALUES (#{userId}, #{sessionId}, #{question}, #{answer}, #{provider}, #{model})
+    </insert>
+
+    <select id="selectPage" resultType="com.luojiajun.chat.entity.ChatFavorite">
+        SELECT f.id, f.user_id, f.session_id, f.question, f.answer, f.provider, f.model, f.created_at
+        FROM chat_favorite f
+        WHERE f.user_id = #{userId}
+        <if test="tagId != null">
+            AND EXISTS (SELECT 1 FROM chat_favorite_tag ft WHERE ft.favorite_id = f.id AND ft.tag_id = #{tagId})
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (f.question LIKE CONCAT('%', #{keyword}, '%') OR f.answer LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY f.id DESC
+    </select>
+
+    <select id="selectByIdAndUser" resultType="com.luojiajun.chat.entity.ChatFavorite">
+        SELECT id, user_id, session_id, question, answer, provider, model, created_at
+        FROM chat_favorite
+        WHERE id = #{id} AND user_id = #{userId}
+    </select>
+
+    <delete id="deleteByIdAndUser">
+        DELETE FROM chat_favorite WHERE id = #{id} AND user_id = #{userId}
+    </delete>
+
+    <insert id="insertTagRelations">
+        INSERT INTO chat_favorite_tag (favorite_id, tag_id) VALUES
+        <foreach collection="tagIds" item="tagId" separator=",">
+            (#{favoriteId}, #{tagId})
+        </foreach>
+    </insert>
+
+    <delete id="deleteRelationsByFavorite">
+        DELETE FROM chat_favorite_tag WHERE favorite_id = #{favoriteId}
+    </delete>
+
+    <select id="selectTagsByFavoriteIds" resultType="com.luojiajun.chat.entity.ChatTag">
+        SELECT ft.favorite_id AS favorite_id, t.id, t.user_id, t.name, t.created_at
+        FROM chat_favorite_tag ft
+        JOIN chat_tag t ON t.id = ft.tag_id
+        WHERE ft.favorite_id IN
+        <foreach collection="favoriteIds" item="fid" open="(" separator="," close=")">
+            #{fid}
+        </foreach>
+    </select>
+</mapper>

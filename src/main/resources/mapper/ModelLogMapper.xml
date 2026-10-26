@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luojiajun.chat.mapper.ModelLogMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chat_model_call_log (user_id, session_id, message_id, request_id, provider, model,
+                                         status, http_status, token_in, token_out, latency_ms,
+                                         first_token_ms, retry_count, error_code, error_msg)
+        VALUES (#{userId}, #{sessionId}, #{messageId}, #{requestId}, #{provider}, #{model},
+                #{status}, #{httpStatus}, #{tokenIn}, #{tokenOut}, #{latencyMs},
+                #{firstTokenMs}, #{retryCount}, #{errorCode}, #{errorMsg})
+    </insert>
+
+    <select id="selectTotals" resultType="java.util.Map">
+        SELECT COUNT(*) AS totalCalls,
+               COALESCE(SUM(COALESCE(token_in, 0) + COALESCE(token_out, 0)), 0) AS totalTokens
+        FROM chat_model_call_log
+    </select>
+
+    <select id="selectTopUsers" resultType="java.util.Map">
+        SELECT l.user_id AS userId,
+               COALESCE(u.username, 'unknown') AS username,
+               COUNT(*) AS calls,
+               COALESCE(SUM(COALESCE(l.token_in, 0) + COALESCE(l.token_out, 0)), 0) AS tokens
+        FROM chat_model_call_log l
+        LEFT JOIN sys_user u ON u.id = l.user_id
+        GROUP BY l.user_id, u.username
+        ORDER BY calls DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectDaily" resultType="java.util.Map">
+        SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS day,
+               COUNT(*) AS calls,
+               COALESCE(SUM(COALESCE(token_in, 0) + COALESCE(token_out, 0)), 0) AS tokens
+        FROM chat_model_call_log
+        WHERE created_at &gt;= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY day
+        ORDER BY day ASC
+    </select>
+</mapper>

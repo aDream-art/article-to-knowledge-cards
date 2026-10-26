@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.luojiajun.chat.mapper.UserMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_user (username, password_hash, nickname, status)
+        VALUES (#{username}, #{passwordHash}, #{nickname}, #{status})
+    </insert>
+
+    <select id="selectByUsername" resultType="com.luojiajun.chat.entity.User">
+        SELECT id, username, password_hash, nickname, status, created_at, updated_at
+        FROM sys_user
+        WHERE username = #{username}
+    </select>
+
+    <select id="selectById" resultType="com.luojiajun.chat.entity.User">
+        SELECT id, username, password_hash, nickname, status, created_at, updated_at
+        FROM sys_user
+        WHERE id = #{id}
+    </select>
+</mapper>
